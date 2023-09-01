@@ -1,0 +1,95 @@
+/* Parametres */
+
+int w ,h,xmin,ymin,xmax,ymax,prof
+
+/* Fin parametres */
+
+/* Initialisation */
+
+int nb_processus,largeur_bloc,my_rank,source,dest=0,tag=0
+
+int taille_bloc = argv[1]
+
+int incx = (xmax-xmin)/(w-1)
+int incy = (ymax - ymin)/(h-1)
+
+
+/* Fin Initialisation */
+
+
+
+/*  OUVRIER */
+
+Si my_rank != 0
+
+    unsigned char* block = (unsigned char*) malloc(sizeof(unsigned char)*w*taille_bloc)
+    
+    int fini = 0
+    int num_ligne,x,y;
+    
+    MPI_Recv(&fini, sizeof(int), MPI_INT, 0, 0, MPI_COMM_WORLD)
+    
+    Tant que (fini==0)
+
+        MPI_Recv(&num_ligne, sizeof(int), MPI_INT, 0, 1, MPI_COMM_WORLD)
+        
+        y = ymin + num_ligne*incy
+
+        Pour i allant de 0 à taille_bloc-1
+            
+            x = xmin
+            
+            Pour j allant de 0 à w-1
+            
+                block[i+j*w] = xy2color(x,y,prof)
+                
+            fin pour
+            y = y +incy
+        fin pour
+
+        MPI_Send(block,sizeof(unsigned char)*w*taille_bloc,MPI_UNSIGNED_CHAR,dest,2,MPI_COMM_WORLD)
+        
+        MPI_Recv(&fini, sizeof(int), MPI_INT, 0, 0, MPI_COMM_WORLD)
+        
+    fin tant que 
+    
+    free(block)
+
+/*  FIN OUVRIER  */
+
+/*  MAITRE  */
+
+Sinon
+    
+    unisgned char* image = (unsigned char*) malloc(sizeof(unsigned char)*w*h)
+    unsigned char* block = (unsigned char*) malloc(sizeof(unsigned char)*w*taille_bloc)
+    
+    nb_ligne = h/taille_bloc
+    
+    int i = 0
+    Tant que i<nb_processus et i<nb_ligne
+        
+        MPI_Send(block,sizeof(unsigned char)*w*taille_bloc,MPI_UNSIGNED_CHAR,i,1,MPI_COMM_WORLD)
+        i++
+    
+    MPI_Recv(&block,sizeof(unsigned char)*w*taille_bloc,MPI_UNSIGNED_CHAR,MPI_ANY_SOURCE,2,MPI_COMM_WORLD,&status)
+    
+    while(&)
+        
+        
+    
+        
+    fin pour
+    
+    Pour source allant de 1 à nb_processus
+    
+        MPI_Recv(&image[taille_bloc*w*source], sizeof(unsigned char)*w*taille_bloc, MPI_UNSIGNED_CHAR, source, tag, MPI_COMM_WORLD)
+    
+    fin pour
+    
+fin si
+
+/* FIN MAITRE   */
+    
+    
+    

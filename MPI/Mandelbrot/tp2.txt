@@ -1,0 +1,66 @@
+/* Parametres */
+
+int w ,h,xmin,ymin,xmax,ymax,prof
+
+/* Fin parametres */
+
+/* Initialisation */
+
+int nb_processus,largeur_bloc,my_rank,source,dest=0,tag=0
+
+int largeur_block = h/nb_processus
+
+int incx = (xmax-xmin)/(w-1)
+int incy = (ymax - ymin)/(h-1)
+
+
+int y = ymin + largeur_block*my_rank*incy
+int x
+
+/* Fin Initialisation */
+
+
+Si my_rank != 0
+
+    unsigned char* block = (unsigned char*) malloc(sizeof(unsigned char)*w*largeur_block)
+    
+    Pour i allant de 0 à largeur_block-1
+
+        x=xmin
+        Pour j allant de 0 à w-1
+            block[i+j*w] = xy2color(x,y,prof)
+            x = x + incx
+        fin pour
+        y = y +incy
+    fin pour
+
+    MPI_Send(block,sizeof(unsigned char)*w*largeur_block,MPI_UNSIGNED_CHAR,dest,tag,MPI_COMM_WORLD)
+
+    free(block)
+
+Sinon
+    
+    unisgned char* image = (unsigned char*) malloc(sizeof(unsigned char)*w*h)
+    
+    Pour i allant de 0 à largeur_block-1
+
+        x=xmin
+        Pour j allant de 0 à w-1
+            image[i+j*w] = xy2color(x,y,prof)
+            x = x + incx
+        fin pour
+        y = y +incy
+        
+    fin pour
+    
+    Pour source allant de 1 à nb_processus
+    
+        MPI_Recv(&image[largeur_block*w*source], sizeof(unsigned char)*w*largeur_block, MPI_UNSIGNED_CHAR, source, tag, MPI_COMM_WORLD)
+    
+    fin pour
+    
+fin si
+    
+    
+    
+    
